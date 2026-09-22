@@ -1,0 +1,29 @@
+name: Temporary Affinote ZIP bridge
+
+on:
+  push:
+    paths:
+      - ".github/workflows/tmp-affinote-zip.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and commit ZIP
+        run: |
+          set -euo pipefail
+          mkdir -p public
+          curl -fL --retry 3 \
+            https://tmpfiles.org/dl/wAwY8NWIMH5I/cheese-photos-50.zip \
+            -o public/cheese-photos-50.zip
+          test "$(stat -c%s public/cheese-photos-50.zip)" -gt 1000000
+          sha256sum public/cheese-photos-50.zip
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/cheese-photos-50.zip
+          git commit -m "Temporary Affinote cheese photo ZIP [skip ci]"
+          git push
